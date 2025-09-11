@@ -19,22 +19,23 @@ export const AppContextOtherProvider = ({
   // if you logged counter in the incrementMemo function,
   // then you'd want useCallback to take the counter variable as a dep.
   //  Which would mean it'd be a "new" incrementMemo function every time counter changes, which means the downstream useEffect will run every time counter changes, too.
-  const incrementMemo = useCallback(() => {
+  // Memoized increment and decrement memo
+  const increment = useCallback(() => {
     setCounter((prevState) => prevState + 1);
   }, []);
 
-  const decrementMemo = useCallback(() => {
+  const decrement = useCallback(() => {
     setCounter((prevState) => prevState - 1);
   }, []);
 
   const value = useMemo(() => {
     return {
-      incrementMemo,
-      decrementMemo,
+      increment,
+      decrement,
       counter,
       setCounter,
     };
-  }, [counter, setCounter, incrementMemo, decrementMemo]);
+  }, [counter, setCounter, increment, decrement]);
 
   return (
     <AppContextOther.Provider value={value}>

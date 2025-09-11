@@ -50,8 +50,9 @@ export const AppContent = () => {
   //https://youtu.be/vpE9I_eqHdM?si=LHXTnUOhvH3mTGuM&t=324
 
   //When the provider re-renders, it causes the consumer to re-render (i.e this componenet)
-  //The context rerenders, but returns the same functions for incrementMemo and decrementMemo because they're wrapped in useCallback.
+  //The context rerenders, but returns the same functions for the memoized increment and decrement function because they're wrapped in useCallback.
   // When the context runs, it'll check the useCallback deps to see if any have changed (which, there aren't any, so they never will) and if not, returns the same function as the previous render.
+  //try using the increment and decrement  that is not under  useCallback and it keeps rendering the function
   useEffect(() => {
     console.log("aa");
   }, [appOtherIncrement]);
