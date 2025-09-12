@@ -67,3 +67,7 @@ export default tseslint.config([
   },
 ])
 ```
+
+
+1) Run `yarn run dev`
+2) on bobbyhill_bakcend do `npm run convert`
