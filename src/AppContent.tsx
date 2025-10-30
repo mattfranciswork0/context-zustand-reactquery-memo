@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAppOther } from "./AppContextOther";
 import { Link } from "react-router";
 import { getMovies, postMovies } from "./api/user";
+import { AppChild } from "./AppChild";
+import { AppChildReactive } from "./AppChildReactive";
 
 const setCount = () => {
   useCounterStore.setState({ count: 1 }); //Outside of componenet, so this is how we set count
@@ -17,6 +19,13 @@ const initialItems = [
   { id: 2, isSelected: true }, // this one will be selected
   { id: 3, isSelected: false },
 ];
+
+// 1. getState() - NOT reactive (no re-renders), useful if you only want to get the value once
+const logCount = () => {
+  const count = useCounterStore.getState().count;
+  return count;
+  console.log("count", count);
+};
 
 export const AppContent = () => {
   const count = useCounterStore((state) => state.count);
@@ -35,16 +44,17 @@ export const AppContent = () => {
   // const [data, setData] = useState(null);
   // const [isLoading, setIsLoading] = useState(false);
   //UseMemo stuff
-  //const items = [{ isSelected: true, text: "foo" }];
+  const items = [{ isSelected: true, text: "foo" }];
   //Will run very render
   // const selectedItem = items.find((item) => item.isSelected);
   //You can prevent this from re-running every render with useMemo:
-  // const selectedItem = useMemo(() => {
-  //   return items.find((item) => item.isSelected);
-  // }, []);
-  // useEffect(() => {
-  //   console.log("This runs every render");
-  // }, [selectedItem]); //If the items are created outside of the component...As long as the items are not being individually recreated every render,
+  const selectedItem = useMemo(() => {
+    return items.find((item) => item.isSelected);
+  }, []);
+  useEffect(() => {
+    console.log("This runs every render");
+  }, [selectedItem]);
+  // //If the items are created outside of the component...As long as the items are not being individually recreated every render,
   // then selectedItem will be the same from render-to-render, so the useEffect will not re-run.
   //But it does still create a new function everytime it re-renders even when the items are outside of the component, hence why useMemo is important:
   //https://youtu.be/vpE9I_eqHdM?si=LHXTnUOhvH3mTGuM&t=324
@@ -63,10 +73,15 @@ export const AppContent = () => {
 
   const { filters, setFilters } = useUserStore();
 
+  // 2. Hook selector - REACTIVE (causes re-renders). This is is a bad way to use zustnad because it will re-redner everything
+  //you need to be especific with your  store, this is better:
+  //  const decrement = useCounterStore((state) => state.decrement);
+  const { decrement: zustandDecrement } = useCounterStore();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: () => getMovies(),
-    // staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
   // const getMovieData = async () => {
   //   setIsLoading(true);
@@ -96,13 +111,22 @@ export const AppContent = () => {
   };
   //Dont  store server from the backend to the  zustand store it  is duplicaiton,
   // just use it directly ( Only store client-side state or derived data in Zustand):
+  //https://www.youtube.com/watch?v=QTZTUrAbjeo
   //   const { users, setUsers } = useUserStore();
-
+  const number = useMemo(() => {
+    return 3;
+  }, []);
   if (isLoading) return <h1> Loading</h1>;
   // if (error) return <h1>{error.message}</h1>;
   if (data)
     return (
       <div className="max-w-md mx-auto p-6 space-y-4">
+        <button onClick={() => zustandDecrement()}>
+          MAKE AZUSTAND DECREMENT
+        </button>
+        <AppChildReactive />
+        <AppChild />
+        <p>{number}</p>
         <button onClick={() => postMovies()}>MAKE A POST REQUEST</button>
         <div className="bg-green-100 p-4 rounded">
           <text>Movie title: {data.title} </text>
