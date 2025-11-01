@@ -9,6 +9,7 @@ import { Link } from "react-router";
 import { getMovies, postMovies } from "./api/user";
 import { AppChild } from "./AppChild";
 import { AppChildReactive } from "./AppChildReactive";
+import { useBlogContext } from "./BlogContext";
 
 const setCount = () => {
   useCounterStore.setState({ count: 1 }); //Outside of componenet, so this is how we set count
@@ -77,12 +78,12 @@ export const AppContent = () => {
   //you need to be especific with your  store, this is better:
   //  const decrement = useCounterStore((state) => state.decrement);
   const { decrement: zustandDecrement } = useCounterStore();
-
   const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: () => getMovies(),
     staleTime: 5 * 60 * 1000,
   });
+  //Example of a proper fetch
   // const getMovieData = async () => {
   //   setIsLoading(true);
   //   try {
@@ -116,11 +117,44 @@ export const AppContent = () => {
   const number = useMemo(() => {
     return 3;
   }, []);
+  const vals = useBlogContext();
+  const [moviesData, setMoviesData] = useState(null);
+  const loadMovies = async () => {
+    try {
+      const data = await getMovies();
+      setMoviesData(data);
+    } catch (e) {
+      console.log("e", error);
+      console.error("Error fetching users:", e);
+      throw e;
+    } finally {
+      //setIsLoading(false)
+    }
+  };
+
+  useEffect(() => {
+    //https://javascript.plainenglish.io/mastering-api-calls-in-react-with-fetch-async-await-a-junior-devs-guide-e24902d3b974
+    // const loadMovies = async () => {
+    //   try {
+    //     const data = await getMovies();
+    //     setMoviesData(data);
+    //   } catch (e) {
+    //     console.log("e", error);
+    //   } finally {
+    //     //setIsLoading(false)
+    //   }
+    // };
+    // loadMovies();
+  }, []);
+  console.log("moviesData", moviesData);
+
+  console.log("vals", vals);
   if (isLoading) return <h1> Loading</h1>;
   // if (error) return <h1>{error.message}</h1>;
   if (data)
     return (
       <div className="max-w-md mx-auto p-6 space-y-4">
+        <button onClick={loadMovies}>FETCH MOVIES WITH FETCH ONLY</button>
         <button onClick={() => zustandDecrement()}>
           MAKE AZUSTAND DECREMENT
         </button>
